@@ -64,24 +64,26 @@ func newimape(img image.Image) *imape {
 
 func Print(img image.Image) {
 	var (
-		imp = newimape(img)
-		//		regions = make([]Region, 0, 16)
+		imp     = newimape(img)
+		regions = make([]Region, 0, 16)
 	)
-	//	for y := 0; y < imp.height; y++ {
-	//		for x := 0; x < imp.width; x++ {
-	//			color := imp.at(x, y)
-	//			if color != nil {
-	//				r := new(Region)
-	//				imp.etch(r, &Point{x, y})
-	//				regions = append(regions, *r)
-	//			}
-	//		}
-	//	}
+	for y := 0; y < imp.height; y++ {
+		for x := 0; x < imp.width; x++ {
+			color := imp.at(x, y)
+			if color != nil {
+				r := new(Region)
+				imp.etch(r, &Point{x, y})
+				regions = append(regions, *r)
+			}
+		}
+	}
 
 	m := image.NewRGBA(img.Bounds())
-	r := new(Region)
-	imp.etch(r, &Point{0, 0})
-	draw.DrawMask(m, m.Bounds(), &image.Uniform{color.RGBA{0xcc, 0x40, 0x00, 0xff}}, image.ZP, r, image.ZP, draw.Over)
+	for i, r := range regions {
+		if i != 0 {
+			draw.DrawMask(m, m.Bounds(), &image.Uniform{r.Color}, image.ZP, &r, image.ZP, draw.Over)
+		}
+	}
 	png.Encode(os.Stdout, m)
 }
 
